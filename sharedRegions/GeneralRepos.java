@@ -123,6 +123,16 @@ public class GeneralRepos
       currentSit++;
    }
 
+   public synchronized void removeSit (int StudentId)
+   {
+      for( int i = 0; i < SimulPar.N ; i++){
+         if( studentSit[i] == StudentId ){
+            studentSit[i] = -1;
+            break;
+         } 
+      }
+   }
+
   /**
    *  Write the header to the logging file.
    *

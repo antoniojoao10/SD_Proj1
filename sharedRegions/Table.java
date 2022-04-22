@@ -19,13 +19,13 @@ import genclass.GenericIO;
 public class Table
 {
   /**
-   *  Number students
+   *  Number students in the restaurante
    */
 
    private int waitingTable;
 
    /**
-   * Student already choose Course
+   * Student already decided Course
    */
 
   private int decidedStudents;
@@ -48,18 +48,50 @@ public class Table
 
   private int portions;
 
+  /**
+   * Flag - Last student to arrived has already honour the waiter
+   */
+
   private boolean hasBeenHonour;
+
+  /**
+   * Number of students that entered the restaurant and havent been saluted
+   */
 
   private int movement;
 
+  /**
+   * Flag - Student signals the waiter for more food/next portion
+   */
+
   private boolean signalTheWaiter;
+
+  /**
+   * Falg - First Student calls the waiter to describe the order
+   */
 
   private boolean callTheWaiter;
 
+  /**
+   * Flag - Signal the waiter that the last Student will pay the bill
+   */
+
   private boolean shouldHaveArrivedEarlier;
 
+  /**
+   * First student id - The one that will describe the order to the waiter
+   */
+
   private int firstStudent;
+
+  /**
+   * Last student it - The one the will pay the bill and honour the waiter
+   */
   private int lastStudent;
+
+  /**
+   * Flag -  Signal the waiter thar every student leaved the restaurant
+   */
   private boolean exit;
 
   /**
@@ -68,14 +100,22 @@ public class Table
 
    private final Student [] stu;
 
+   /**
+   * Reference to Waiter thread
+   */
+
    private Waiter wai;
 
 
   /**
-   *   Waiting seats occupation.
+   *   Order of students arrival.
    */
 
    private MemFIFO<Integer> sitStudent;
+
+   /**
+   * Temporary order of students arrival. Temp fifo just for the salute function 
+   */
 
    private MemFIFO<Integer> order;
 
@@ -129,33 +169,43 @@ public class Table
       this.repos = repos;
    }
 
+   /**
+   * The student enters the restaurant.
+   * Transitions the student state from "going to the restaurant" to "taking a sit at the table" 
+   */
+
    public synchronized void enter ()
    {
         int StudentId;
 
         StudentId = ((Student) Thread.currentThread ()).getStudentId ();
         stu[StudentId] = (Student) Thread.currentThread ();
+        //write in fifo
         try {
             sitStudent.write(StudentId);
             order.write(StudentId);
         } catch (MemException e) { 
             e.printStackTrace();
         }   
+        // If it is the first student to arrive
         if( firstStudent == -1) { 
             firstStudent = StudentId; 
             stu[StudentId].setFirst();
         }
+        // If it is the last student to arrive
         if(sitStudent.full()){
             lastStudent = StudentId;
             stu[lastStudent].setlast();
         }
+        //set state
         stu[StudentId].setStudentState (StudentStates.TAKINGASEATATTHETABLE);
         repos.setstudentState(StudentId, stu[StudentId].getStudentState()); 
+
         movement ++;
         waitingTable++; 
         stu[StudentId].enterBar();
         notifyAll ();   
-            // Sleep while waiting for the menu 
+        // Student will sleep while waiting for the menu 
         while ( !(stu[StudentId].getStudentMenu()) ){
             try {
                 wait();
@@ -163,14 +213,20 @@ public class Table
                 e.printStackTrace();
             }
         }   
-        notifyAll ();                                        // the Student settles the account
+        notifyAll ();    
    }
+
+   /**
+   * Flags function just to alter the variables in the waiter thread.
+   * @return Will return True while there are students in the restaurant. And, when False will kill the waiter thread
+   */
 
    public synchronized boolean checkingFlags ()
    {
-        if(this.exit) return false;
-       if(portions == SimulPar.P ) this.signalTheWaiter = false;
-       if( this.movement > 0){
+        if(this.exit) return false;  // return false if all students left the restaurant
+        if(portions == SimulPar.P ) this.signalTheWaiter = false;  // if all the students have finished all the portions, they cannot signal the waiter anymore
+
+        if( this.movement > 0){
             ((Waiter) Thread.currentThread ()).setmovement(movement);
             this.movement = 0;
         }
@@ -186,64 +242,87 @@ public class Table
             ((Waiter) Thread.currentThread ()).setsignalTheWaiter();
             this.signalTheWaiter = false;
         }
-         notifyAll ();     
+        notifyAll ();     
         
         
-      return true;                                   // the Student settles the account
+        return true;  
    }
+
+   /**
+   * The student reads the menu.
+   * Transitions the student state from "taking a sit at the table" to "selecting the courses" 
+   */
 
    public synchronized void readTheMenu ()
    {
-      int StudentId;
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-      stu[StudentId].setStudentState (StudentStates.SELECTINGTHECOURSES);
-      repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+        int StudentId;
+        //set state
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
+        stu[StudentId].setStudentState (StudentStates.SELECTINGTHECOURSES);
+        repos.setstudentState(StudentId, stu[StudentId].getStudentState());
 
-      stu[StudentId].setRead();
+        //change the flag of the current student thread to inform that he/she already read the menu
+        stu[StudentId].setRead();
 
-      notifyAll ();                                        // the Student settles the account
+        notifyAll ();                                       
    }
+
+   /**
+   * The first student joins the companions talk.
+   * Transitions the student state from "organizing the order" to "chatting with companions" 
+   */
 
    public synchronized void joinTheTalk ()
    {
       int StudentId;
-      
+      //set state
       StudentId = ((Student) Thread.currentThread ()).getStudentId ();
       stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
       repos.setstudentState(StudentId, stu[StudentId].getStudentState());
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
+
+   /**
+   * The student starts eating.
+   * Transitions the student state from "chatting with companions" to "enjoying meal" 
+   */
 
    public synchronized void startEating ()
    {
-      int StudentId;
-      
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-      stu[StudentId].setStudentState (StudentStates.ENJOYINGTHEMEAL);
-      repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+        int StudentId;
+        //set state
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
+        stu[StudentId].setStudentState (StudentStates.ENJOYINGTHEMEAL);
+        repos.setstudentState(StudentId, stu[StudentId].getStudentState());
 
+        //student be eating during a random time
+        stu[StudentId].eating();
 
-      stu[StudentId].eating();
-
-      notifyAll ();                                        // the Student settles the account
+        notifyAll ();                                        
    }
 
+   /**
+   * The student finished the portion.
+   * Transitions the student state from "enjoying meal" o "chatting with companions" 
+   */
    public synchronized void endEating ()
    {
-      int StudentId;
-      
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-      stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
-      repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+        int StudentId;
+        //set state
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
+        stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
+        repos.setstudentState(StudentId, stu[StudentId].getStudentState());
 
-      stu[StudentId].incrementStudentCourse();
-      stu[StudentId].setHasPortion();
+        //increment the student course
+        stu[StudentId].incrementStudentCourse();
+        //
+        stu[StudentId].setHasPortion();
 
-      this.portions++;
-      repos.setNPortion(this.portions);
+        this.portions++;
+        repos.setNPortion(this.portions);
 
-      notifyAll ();                                        // the Student settles the account
+        notifyAll ();                                        
    }
 
    public synchronized void informCompanion ()
@@ -264,7 +343,7 @@ public class Table
             e.printStackTrace();
         }
          }
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
    public synchronized void hasEverybodyFinished ()
@@ -276,7 +355,7 @@ public class Table
             e.printStackTrace();
         }
         }
-        notifyAll ();                                        // the Student settles the account
+        notifyAll ();                                        
    }
 
 
@@ -288,11 +367,13 @@ public class Table
       stu[StudentId].setStudentState (StudentStates.GOINGHOME);
       repos.setstudentState(StudentId, stu[StudentId].getStudentState());
 
+      repos.removeSit(StudentId);
+
       this.waitingTable--;
       if(this.waitingTable == 0){
         this.exit = true;
       }
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
    public synchronized void prepareOrder ()
@@ -305,7 +386,7 @@ public class Table
 
       this.decidedStudents ++;
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
 
       // Sleep while waiting for all students to decide
       while ( this.decidedStudents != SimulPar.N ){
@@ -317,7 +398,7 @@ public class Table
          }
      }
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
    public synchronized void callTheWaiter ()
@@ -325,7 +406,7 @@ public class Table
 
       this.callTheWaiter = true; 
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
 
       // Sleep while waiting for all students to decide
       while ( !(this.getThePad) ){
@@ -336,7 +417,7 @@ public class Table
          }
      }
       this.getThePad = false;
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
    public synchronized void signalTheWaiter ()
@@ -355,7 +436,7 @@ public class Table
          }
      }
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
    public synchronized void shouldHaveArrivedEarlier ()
@@ -365,7 +446,7 @@ public class Table
 
       this.shouldHaveArrivedEarlier = true;
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
 
 
       // Sleep while waiting for all students to decide
@@ -379,7 +460,7 @@ public class Table
 
       stu[lastStudent].honourTheBill();
       this.hasBeenHonour = true;
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
    public synchronized void saluteTheClient ()
@@ -408,14 +489,14 @@ public class Table
                 e.printStackTrace();
             }
         }
-        notifyAll ();                                        // the Student settles the account
+        notifyAll ();                                        
    }
 
    public synchronized void getThePad ()
    {
       this.getThePad = true;
       
-     notifyAll ();                                        // the Student settles the account
+     notifyAll ();                                        
    }
 
    public synchronized void deliverPortion ()
@@ -439,7 +520,7 @@ public class Table
 
     stu[StudentId].setHasPortion();
 
-     notifyAll ();                                        // the Student settles the account
+     notifyAll ();                                        
    }
 
    public synchronized void presentTheBill ()
@@ -455,6 +536,6 @@ public class Table
          }
         ((Waiter) Thread.currentThread ()).setWaiterState(WaiterStates.RECEIVINGPAYMENT);
         repos.setwaiterState(wai.getWaiterId(), WaiterStates.RECEIVINGPAYMENT);
-        notifyAll ();                                        // the Student settles the account
+        notifyAll ();                                        
     }
 }
