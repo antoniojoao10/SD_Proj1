@@ -304,7 +304,7 @@ public class Table
 
    /**
    * The student finished the portion.
-   * Transitions the student state from "enjoying meal" o "chatting with companions" 
+   * Transitions the student state from "enjoying meal" to "chatting with companions" 
    */
    public synchronized void endEating ()
    {
@@ -325,164 +325,25 @@ public class Table
         notifyAll ();                                        
    }
 
+   /**
+   * The student informs the first student that it has decided his course.
+   * Transitions the student state from "selecting the courses" to "chatting with companions" 
+   */
+
    public synchronized void informCompanion ()
    {
-      int StudentId;
-      
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-      stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
-      repos.setstudentState(StudentId, stu[StudentId].getStudentState());
-
-      this.decidedStudents++;
-      notifyAll();
-
-      while ( this.stu[firstStudent].getStudentState() != StudentStates.CHATTINGWITHCOMPANIONS ){
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-         }
-      notifyAll ();                                        
-   }
-
-   public synchronized void hasEverybodyFinished ()
-   {
-        while ( !this.hasBeenHonour ){
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        }
-        notifyAll ();                                        
-   }
-
-
-   public synchronized void exit ()
-   {
-      int StudentId;
-      
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-      stu[StudentId].setStudentState (StudentStates.GOINGHOME);
-      repos.setstudentState(StudentId, stu[StudentId].getStudentState());
-
-      repos.removeSit(StudentId);
-
-      this.waitingTable--;
-      if(this.waitingTable == 0){
-        this.exit = true;
-      }
-      notifyAll ();                                        
-   }
-
-   public synchronized void prepareOrder ()
-   {
-      int StudentId;
-      
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-      stu[StudentId].setStudentState (StudentStates.ORGANIZINGTHEORDER);
-      repos.setstudentState(StudentId, stu[StudentId].getStudentState());
-
-      this.decidedStudents ++;
-
-      notifyAll ();                                        
-
-      // Sleep while waiting for all students to decide
-      while ( this.decidedStudents != SimulPar.N ){
-         try {
-             //System.out.println(this.decidedStudents);
-             wait();
-         } catch (InterruptedException e) {
-             e.printStackTrace();
-         }
-     }
-
-      notifyAll ();                                        
-   }
-
-   public synchronized void callTheWaiter ()
-   {
-
-      this.callTheWaiter = true; 
-
-      notifyAll ();                                        
-
-      // Sleep while waiting for all students to decide
-      while ( !(this.getThePad) ){
-         try {
-             wait();
-         } catch (InterruptedException e) {
-             e.printStackTrace();
-         }
-     }
-      this.getThePad = false;
-      notifyAll ();                                        
-   }
-
-   public synchronized void signalTheWaiter ()
-   {
-      this.signalTheWaiter = true; 
-      int StudentId;
-      
-      StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-   
-      // Sleep while waiting for all students to decide
-      while ( !stu[StudentId].getHasPortion()){
-         try {
-             wait();
-         } catch (InterruptedException e) {
-             e.printStackTrace();
-         }
-     }
-
-      notifyAll ();                                        
-   }
-
-   public synchronized void shouldHaveArrivedEarlier ()
-   {
-      stu[lastStudent].setStudentState (StudentStates.PAYINGTHEBILL);
-      repos.setstudentState(lastStudent, stu[lastStudent].getStudentState());
-
-      this.shouldHaveArrivedEarlier = true;
-
-      notifyAll ();                                        
-
-
-      // Sleep while waiting for all students to decide
-      while (!(this.presentBill) ){
-         try {
-             wait();
-         } catch (InterruptedException e) {
-             e.printStackTrace();
-         }
-     }
-
-      stu[lastStudent].honourTheBill();
-      this.hasBeenHonour = true;
-      notifyAll ();                                        
-   }
-
-   public synchronized void saluteTheClient ()
-   {
-
-        int StudentId = 0;
-
-        wai = ((Waiter) Thread.currentThread ());
-        repos.setwaiterState( ((Waiter) Thread.currentThread ()).getWaiterId(), WaiterStates.PRESENTINGTHEMENU);
-
-        try {
-            StudentId = order.read();
-        } catch (MemException e) { 
-            e.printStackTrace();
-        }
-
-        repos.writeSit(StudentId);
+        int StudentId;
+        //set state
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
+        stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
+        repos.setstudentState(StudentId, stu[StudentId].getStudentState());
         
-        stu[StudentId].setStudentMenu();
+        //Increment the number of students that alrready decided their courses
+        this.decidedStudents++;
         notifyAll();
 
-        while( !stu[StudentId].getRead()){
+        //wait until the first student joins the "chatting with companions" state
+        while ( this.stu[firstStudent].getStudentState() != StudentStates.CHATTINGWITHCOMPANIONS ){
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -492,48 +353,241 @@ public class Table
         notifyAll ();                                        
    }
 
-   public synchronized void getThePad ()
+   /**
+   * Students wait until everyone has finished their meals
+   */
+
+   public synchronized void hasEverybodyFinished ()
    {
-      this.getThePad = true;
-      
-     notifyAll ();                                        
+       //wait until the last student has honnour the waiter
+        while ( !this.hasBeenHonour ){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        notifyAll ();                                        
    }
 
-   public synchronized void deliverPortion ()
-   {
-      
-    int StudentId = 0;
+   /**
+   * The student finished the portion.
+   * Transitions the student state from "chatting with companions" o "going home" 
+   */
 
-    wai = ((Waiter) Thread.currentThread ());
+   public synchronized void exit ()
+   {
+        int StudentId;
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
+            
+        repos.removeSit(StudentId); // remove student from his sit at the table
+
+        this.waitingTable--; // Decrement number of students in the restaurant
+        //wait for all student to leave the table
+        if(this.waitingTable == 0){
+            this.exit = true;
+        }
+
+        //set state
+        stu[StudentId].setStudentState (StudentStates.GOINGHOME);
+        repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+        notifyAll ();                                        
+   }
+
+    /**
+     * The first student prepares the order.
+     * Transitions the student state from "selecting the courses" to "organazing the order" 
+     */
+    public synchronized void prepareOrder ()
+    {
+        int StudentId;
+        //set state
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
+        stu[StudentId].setStudentState (StudentStates.ORGANIZINGTHEORDER);
+        repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+
+        this.decidedStudents ++; //the first student has already decided his own course
+
+        notifyAll ();                                        
+
+        // Sleep while waiting for all students to decide
+        while ( this.decidedStudents != SimulPar.N ){
+            try {
+                //System.out.println(this.decidedStudents);
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+      notifyAll ();                                        
+    }
+
+    /**
+    * The first student calls the waiter to inform of the students order.
+    */
+
+    public synchronized void callTheWaiter ()
+    {
+
+        this.callTheWaiter = true; //Flag that the waiter has been called
+
+        notifyAll ();                                        
+
+        // Sleep while the waiter hasnt given the pad yet
+        while ( !(this.getThePad) ){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        this.getThePad = false;
+        notifyAll ();                                        
+    }
+
+    /**
+     * The student signals the waiter for the next protion
+     */
+    public synchronized void signalTheWaiter ()
+    {
+        this.signalTheWaiter = true; // Flag to signla the waiter that wants another portion
+        int StudentId;
+        
+        StudentId = ((Student) Thread.currentThread ()).getStudentId ();
     
-    try {
-        StudentId = sitStudent.read();
-    } catch (MemException e) { 
-        e.printStackTrace();
+        // Sleep while the waiter doenst deliver his portion
+        while ( !stu[StudentId].getHasPortion()){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        notifyAll ();                                        
     }
 
-    try {
-        sitStudent.write(StudentId);
-    } catch (MemException e) { 
-        e.printStackTrace();
+    /**
+     * The last student pays the bill.
+     * Transitions the student state from "chatting with companions" to "paying the bill" 
+     */
+    public synchronized void shouldHaveArrivedEarlier ()
+    {
+        //set state
+        stu[lastStudent].setStudentState (StudentStates.PAYINGTHEBILL);
+        repos.setstudentState(lastStudent, stu[lastStudent].getStudentState());
+
+        this.shouldHaveArrivedEarlier = true; // flag that the last student is ready to pay the bill
+
+        notifyAll ();                                        
+
+
+        // Sleep while the waiter hasnt given the bill to the last student
+        while (!(this.presentBill) ){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        stu[lastStudent].honourTheBill(); // honour the waiter
+        this.hasBeenHonour = true; // Flag that the waiter has been honoured
+        notifyAll ();                                        
     }
 
-    stu[StudentId].setHasPortion();
+    /**
+   * The waiter will salute the students that entered the restaurant.
+   * Transitions the waiter state from "apprassing the situation" to "presenting the menu" 
+   */
 
-     notifyAll ();                                        
-   }
+    public synchronized void saluteTheClient ()
+    {
+        int StudentId = 0;
+        //set state
+        wai = ((Waiter) Thread.currentThread ());
+        repos.setwaiterState( ((Waiter) Thread.currentThread ()).getWaiterId(), WaiterStates.PRESENTINGTHEMENU);
 
-   public synchronized void presentTheBill ()
-   {
-        this.presentBill = true;
+        try {
+            //reads the student by the order of arrival
+            StudentId = order.read();
+        } catch (MemException e) { 
+            e.printStackTrace();
+        }
+
+        repos.writeSit(StudentId); //sits the student in the respective seat at the table
+        
+        stu[StudentId].setStudentMenu(); // Gives the student his menu
+
         notifyAll();
+
+        // Sleeps while waiting for the student to read the menu
+        while( !stu[StudentId].getRead()){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        notifyAll ();                                        
+    }
+
+    /**
+   * Change the getThePad flag.
+   */
+    public synchronized void getThePad ()
+    {
+        this.getThePad = true;
+        notifyAll ();                                        
+    }
+
+    
+    /**
+   * The waiter delivers the portion.
+   */
+    public synchronized void deliverPortion ()
+    {
+        int StudentId = 0;
+
+        wai = ((Waiter) Thread.currentThread ());
+        
+        try {
+            StudentId = sitStudent.read();
+        } catch (MemException e) { 
+            e.printStackTrace();
+        }
+
+        try {
+            sitStudent.write(StudentId);
+        } catch (MemException e) { 
+            e.printStackTrace();
+        }
+
+        stu[StudentId].setHasPortion(); //Gives the student his portion
+
+        notifyAll ();                                        
+    }
+
+    /**
+   * The waiter presents the bill to the last student.
+   * Transitions the waiter state from "processing the bill" to "receiving the bill" 
+   */
+    public synchronized void presentTheBill ()
+    {
+        this.presentBill = true; //Flags that the waiter has given the last student the bill
+        notifyAll();
+
+        //Sleeps while waiting for the last student to honour him
         while( !this.hasBeenHonour){
             try {
                 wait();
-        } catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
         }
-         }
+
+        //set State
         ((Waiter) Thread.currentThread ()).setWaiterState(WaiterStates.RECEIVINGPAYMENT);
         repos.setwaiterState(wai.getWaiterId(), WaiterStates.RECEIVINGPAYMENT);
         notifyAll ();                                        

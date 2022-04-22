@@ -2,12 +2,10 @@ package main;
 
 import entities.*;
 import sharedRegions.*;
-import genclass.GenericIO;
-import genclass.FileOp;
+
 
 /**
- *   Simulation of the Problem of the Sleeping Barbers.
- *   Static solution based on a posteriori reasoning to terminate the barbers threads.
+ *   Simulation of the Problem The Restaurant.
  */
 
 public class TheRestaurant
@@ -23,12 +21,12 @@ public class TheRestaurant
     Chef chef;												//Reference to the Chef Thread
     Waiter waiter;											//Reference to the Waiter Thread
     Student[] student = new Student[SimulPar.N];    		//array of references to the Students Threads
-    Kitchen kitchen;							//Reference to the Departure Airport
+    Kitchen kitchen;							//Reference to the kitchen
     Bar bar;												//Reference to the Bar
-    Table table;						//Reference to the Destination Airport
+    Table table;						//Reference to the table
     GeneralRepos repos;                             			//Reference to the General Repository
 
-    System.out.println("AirLiftSimulation");
+    System.out.println("The Restaurante");
     /* problem initialization */
     repos = new GeneralRepos("logger");
     kitchen = new Kitchen(repos);

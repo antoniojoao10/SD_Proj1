@@ -22,12 +22,32 @@ public class Waiter extends Thread
    *  Waiter state.
    */
 
-  private int WaiterState;
-  private boolean alertTheWaiter;
-  private int movement;
-  private boolean callTheWaiter;
-  private boolean signalTheWaiter;
-  private boolean shouldHaveArrivedEarlier;
+   private int WaiterState;
+
+   /**
+   *  Flag - The waiter has been alerted
+   */
+   private boolean alertTheWaiter;
+
+   /**
+   *  Number of movement that the waiter needs to salute
+   */
+   private int movement;
+
+   /**
+   *  Flag - The waiter has been called to take the order
+   */
+   private boolean callTheWaiter;
+
+   /**
+   *  The waiter has been called to give the next portion
+   */
+   private boolean signalTheWaiter;
+
+   /**
+   *  The waiter has been called to give the bill to the last student
+   */
+   private boolean shouldHaveArrivedEarlier;
 
 
   /**
@@ -40,9 +60,13 @@ public class Waiter extends Thread
    *  Reference to the Waiter bar.
    */
 
-  private final Bar wBar;
+   private final Bar wBar;
 
-  private final Kitchen wKitchen;
+   /**
+   *  Reference to the Waiter kitchen.
+   */
+
+   private final Kitchen wKitchen;
 
   /**
    *   Instantiation of a Waiter thread.
@@ -113,65 +137,109 @@ public class Waiter extends Thread
       return WaiterState;
    }
 
-  /**
-   *   Life cycle of the Waiter.
+   /**
+   *   Change the flag alert the waiter
    */
 
-  public void setalertTheWaiter ()
-  {
-     this.alertTheWaiter = !this.alertTheWaiter;
-  }
+   public void setalertTheWaiter ()
+   {
+      this.alertTheWaiter = !this.alertTheWaiter;
+   }
 
-  public boolean getalertTheWaiter ()
-  {
-     return this.alertTheWaiter;
-  }
+   /**
+   *   Get the flag alert the waiter
+   */
 
-  public void setcallTheWaiter ()
-  {
-     this.callTheWaiter = !this.callTheWaiter;
-  }
+   public boolean getalertTheWaiter ()
+   {
+      return this.alertTheWaiter;
+   }
 
-  public boolean getcallTheWaiter ()
-  {
-     return this.callTheWaiter;
-  }
+   /**
+   *   Change the flag call the waiter
+   */
 
-  public void setmovement (int n)
-  {
-     this.movement += n;
-  }
+   public void setcallTheWaiter ()
+   {
+      this.callTheWaiter = !this.callTheWaiter;
+   }
 
-  public void removemovement ()
-  {
-     this.movement --;
-  }
+   /**
+   *   Get the flag call the waiter
+   */
 
-  public int getmovement ()
-  {
-     return this.movement;
-  }
+   public boolean getcallTheWaiter ()
+   {
+      return this.callTheWaiter;
+   }
 
-  public void setshouldHaveArrivedEarlier ()
-  {
-     this.shouldHaveArrivedEarlier = !this.shouldHaveArrivedEarlier;
-  }
+   /**
+   *   Icrement the movement
+   *  @param n number of movements
+   */
+   public void setmovement (int n)
+   {
+      this.movement += n;
+   }
 
-  public boolean getshouldHaveArrivedEarlier ()
-  {
-     return this.shouldHaveArrivedEarlier;
-  }
+   /**
+   *   Decrement the movement
+   *  @param n number of movements
+   */
 
-  public void setsignalTheWaiter ()
-  {
-     this.signalTheWaiter = !this.signalTheWaiter;
-  }
+   public void removemovement ()
+   {
+      this.movement --;
+   }
 
-  public boolean getsignalTheWaiter ()
-  {
-     return this.signalTheWaiter;
-  }
+   /**
+   *   Get the movements
+   */
 
+   public int getmovement ()
+   {
+      return this.movement;
+   }
+
+   /**
+   *   Change the flag shouldHaveArrivedEarlier
+   */
+
+   public void setshouldHaveArrivedEarlier ()
+   {
+      this.shouldHaveArrivedEarlier = !this.shouldHaveArrivedEarlier;
+   }
+
+   /**
+   *   Get the flag shouldHaveArrivedEarlier
+   */
+
+   public boolean getshouldHaveArrivedEarlier ()
+   {
+      return this.shouldHaveArrivedEarlier;
+   }
+
+   /**
+   *   Change the flag signal the waiter
+   */
+
+   public void setsignalTheWaiter ()
+   {
+      this.signalTheWaiter = !this.signalTheWaiter;
+   }
+
+   /**
+   *   Get the flag signal the waiter
+   */
+
+   public boolean getsignalTheWaiter ()
+   {
+      return this.signalTheWaiter;
+   }
+
+   /**
+   *   Life cycle of the Waiter.
+   */
 
    @Override
    public void run ()

@@ -23,14 +23,36 @@ public class Student extends Thread
 
    private int StudentState;
 
-   private boolean StudentMenu; // read the menu
+   /**
+   * Flag - Student has the menu
+   */
 
-   private int StudentCourse; //course the student is in
+   private boolean StudentMenu;
+
+   /**
+   *  Number of course that the student is in
+   */
+   private int StudentCourse; 
+
+   /**
+   *  Flag - Student has portion
+   */
 
    private boolean hasPortion;
 
+   /**
+   *  Flag - Is the first student to arrive
+   */
    private boolean iamthefirst;
+
+   /**
+   *  Flag - Is the last student to arrive
+   */
    private boolean iamthelast;
+
+   /**
+   *  Flag - Student already read the menu
+   */
    private boolean read;
 
   /**
@@ -39,11 +61,11 @@ public class Student extends Thread
 
    private final Table sTable;
 
+   /**
+      *  Reference to the Student bar.
+      */
    private final Bar sBar;
 
-   /**
-   *  Reference to the Student bar.
-   */
 
   /**
    *   Instantiation of a Student thread.
@@ -51,6 +73,8 @@ public class Student extends Thread
    *     @param name thread name
    *     @param StudentId Student id
    *     @param sTable reference to the Student table
+   *     @param sTable reference to the Student bar
+   * 
    */
 
    public Student (String name, int StudentId, Table sTable, Bar sBar)
@@ -79,6 +103,9 @@ public class Student extends Thread
       StudentId = id;
    }
 
+   /**
+   *   Change the flag StudentMenu
+   */
    public void setStudentMenu ()
    {
       StudentMenu= !StudentMenu;
@@ -117,43 +144,82 @@ public class Student extends Thread
       return StudentState;
    }
 
+   /**
+   *   Get flag Student menu.
+   *
+   *     @return Student state
+   */
+
    public boolean getStudentMenu()
    {
       return StudentMenu;
    }
+
+   /**
+   *   Get Student course.
+   *
+   *     @return Student state
+   */
 
    public int getStudentCourse()
    {
       return StudentCourse;
    }
 
+    /**
+      *   Increment Student course
+      */
    public void incrementStudentCourse()
    {
       StudentCourse++;
    }
+
+   /**
+      *  Set this student as the first student
+      */
 
    public void setFirst()
    {
       this.iamthefirst = true;
    }
 
+   /**
+      *   Set this student as the last student
+      */
+
    public void setlast()
    {
       this.iamthelast = true;
    }
 
+   /**
+      *   Student enters the bar - Wake threads at the bar
+      */
+
    public void enterBar(){
       sBar.enter();
    }
 
+   /**
+      *  Get flag hasPortion
+      *  @return hasPortion
+      */
    public boolean getHasPortion(){ return this.hasPortion; }
+   /**
+      *  Change flag hasPortion
+      */
    public void setHasPortion(){ this.hasPortion = !this.hasPortion; }
 
+   /**
+      *  Get flag read
+      *  @return read
+      */
    public boolean getRead(){ return read;}
+
+   /**
+      *  Change flag read
+      */
    public void setRead(){ this.read = !this.read; }
-
-
-
 
   /**
    *   Life cycle of the Student.
@@ -162,19 +228,6 @@ public class Student extends Thread
    @Override
    public void run ()
    {
-      /*
-      int studentID;                                      // customer id
-      boolean endOp;                                       // flag signaling end of operations
-
-      while (true)
-      { endOp = sBar.walkabit();                        // the Student sleeps while waiting for other friends
-        if (endOp) break;                                  // check for end of operations
-        studentID = sTable.callACustomer ();               // the Student has waken up and calls next customer
-        cutHair ();                                        // the Student cuts the customer hair
-        sTable.receivePayment (studentID);                 // the Student finishes his service and receives payment for it
-      }
-      */
-
       walkabit();
       sTable.enter();
       sTable.readTheMenu();
@@ -198,12 +251,6 @@ public class Student extends Thread
       sTable.exit();
 
    }
-
-  /**
-   *  Cutting the customer hair.
-   *
-   *  Internal operation.
-   */
 
   public void eating()
   {

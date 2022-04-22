@@ -5,7 +5,6 @@ import entities.*;
 import genclass.GenericIO;
 import genclass.TextFile;
 import java.util.Objects;
-import java.util.zip.CheckedInputStream;
 
 /**
  *  General Repository.
@@ -41,11 +40,29 @@ public class GeneralRepos
  
    private  int  waiterState;
 
+   /**
+   *  State of the chef.
+   */
    private  int  chefState;
 
+   /**
+   *  Number of the current course
+   */
    private int NCourse;
+
+   /**
+   *  Number of portions eaten
+   */
    private int NPortion;
+
+   /**
+   *  Seat to sit the next student to enter the restaurant
+   */
    private int currentSit;
+
+   /**
+   *  Array with the seats of the students
+   */
    private int [] studentSit;
 
   /**
@@ -99,11 +116,23 @@ public class GeneralRepos
       reportStatus ();
    }
 
+   /**
+   *   Set chef state.
+   *
+   *     @param id chef id
+   *     @param state chef state
+   */
    public synchronized void setchefState (int id, int state)
    {
       chefState = state;
       reportStatus ();
    }
+
+   /**
+   *   Update the numbers of portions eaten.
+   *
+   *     @param p portions
+   */
 
    public synchronized void setNPortion (int p)
    {
@@ -111,18 +140,34 @@ public class GeneralRepos
       reportStatus ();
    }
 
+   /**
+   *   Update the number of courses served
+   *
+   *     @param p courses
+   */
    public synchronized void setNCourse (int p)
    {
       NCourse = p;
       reportStatus ();
    }
 
-  public synchronized void writeSit (int StudentId)
+   /**
+   *   Sit the student
+   *
+   *     @param StudentId student id
+   */
+
+   public synchronized void writeSit (int StudentId)
    {
       studentSit[currentSit] = StudentId;
       currentSit++;
    }
 
+   /**
+   *  Remove Student from his seat when exiting the restaurant
+   *
+   *     @param StudentId student id
+   */
    public synchronized void removeSit (int StudentId)
    {
       for( int i = 0; i < SimulPar.N ; i++){
@@ -136,7 +181,7 @@ public class GeneralRepos
   /**
    *  Write the header to the logging file.
    *
-   *  The students are sleeping and the waiters are carrying out normal duties.
+   *  The students are sleeping, the waiter and the ched are carrying out normal duties.
    *  Internal operation.
    */
 
@@ -148,7 +193,7 @@ public class GeneralRepos
          { GenericIO.writelnString ("The operation of creating the file " + logFileName + " failed!");
            System.exit (1);
          }
-      log.writelnString ("                Problem of the Sleeping students");
+      log.writelnString ("                Problem of the Restaurant");
       //log.writelnString ("\nNumber of iterations = " + nIter + "\n");
       log.writelnString ("Chef\tWaiter\tStu0\tStu1\tStu2\tStu3\tStu4\tStu5\tStu6\tNCourse\tNPortion\t\t\t\t\t\t\tTable");
       log.writelnString ("State\tState\tState\tState\tState\tState\tState\tState\tState\t\t\t\t\t\tSeat0\tSeat1\tSeat2\tSeat3\tSeat4\tSeat5\tSeat6");

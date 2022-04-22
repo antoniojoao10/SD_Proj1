@@ -114,12 +114,4 @@ public class Chef extends Thread
       cKitchen.cleanUp();
    }
 
-  /**
-   *  Cutting the customer hair.
-   *
-   *  Internal operation.
-   */
-
-   
-
 }

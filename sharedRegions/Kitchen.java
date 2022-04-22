@@ -1,9 +1,7 @@
 package sharedRegions;
 
-import main.*;
+
 import entities.*;
-import commInfra.*;
-import genclass.GenericIO;
 
 /**
  *    Kitchen.
@@ -18,14 +16,30 @@ import genclass.GenericIO;
 
 public class Kitchen
 {
-  /**
-   *  Number of hair cuts which have been requested and not serviced yet.
+   /**
+   *  Flag - order given fromt the waiter to the chef
+   */
+   private boolean noteGiven;
+
+   /**
+   *  Flag - The food preparation has started
+   */
+   private boolean preparationStarted;
+
+   /**
+   *  Flag - protion is ready
+   */
+   private boolean ready;
+
+   /**
+   *  Number of courses served
+   */
+   private int course;
+
+   /**
+   *   Reference to the general repository.
    */
 
-   private boolean noteGiven;
-   private boolean preparationStarted;
-   private boolean ready;
-   private int course;
    private final GeneralRepos repos;
 
   /**
@@ -43,18 +57,23 @@ public class Kitchen
       this.repos = repos;
    }
 
+   /**
+   * The waiter gives the note with the order to the chef.
+   * Transitions the waiter state from "taking the order" to "placing the order" 
+   */
+
    public synchronized void handTheNoteToTheChef ()   
    {
       int WaiterID;
-      
+      // Set state
       WaiterID = ((Waiter) Thread.currentThread ()).getWaiterId ();
       repos.setwaiterState(WaiterID, WaiterStates.PLACINGTHEORDER);
 
-      this.noteGiven = true;
+      this.noteGiven = true; // the note has be given to the chef
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
 
-
+      //Sleep while waiting for the course to start being prepared
       while (!(this.preparationStarted) ){
          try {
              wait();
@@ -63,18 +82,24 @@ public class Kitchen
          }
       }
 
-      this.preparationStarted = false;
+      this.preparationStarted = false; //Turn off the flag
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
+
+   /**
+   * The waiter collects the portion.
+   * Transitions the waiter state from "apprassing the situation" to "collect the portion" 
+   */
 
    public synchronized void collectPortion ()   
    {
       int WaiterID;
-      
+      //Set the state
       WaiterID = ((Waiter) Thread.currentThread ()).getWaiterId ();
       repos.setwaiterState(WaiterID, WaiterStates.WAITINGFORPORTION);
 
+      //Sleep while waiting for the portion to be ready
       while (!(this.ready) ){
          try {
              wait();
@@ -83,12 +108,16 @@ public class Kitchen
          }
       }
       
-      this.ready = false;
-      notifyAll ();                                        // the Student settles the account
+      this.ready = false; // Turn off the flag
+      notifyAll ();                                        
    }
 
+   /**
+   * The Chef watchs the news while waiting for the order.
+   */
    public synchronized void watchTheNews ()   
    {
+      //Sleeps while the note has not be given
       while (!(this.noteGiven) ){
          try {
              wait();
@@ -97,82 +126,111 @@ public class Kitchen
          }
       }
 
-      this.noteGiven = false;
+      this.noteGiven = false; // turn off the flag
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
+
+   /**
+   * The Chef starts preparing the course
+   * Transitions the chef state from "waiting for an ordr" to "preparing a course" 
+   */
 
    public synchronized void startPreparation ()   
    {
       int ChefID;
-      
+      //Set state
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.PREPARINGACOURSE);
 
-      this.preparationStarted = true;
+      this.preparationStarted = true; //The chef starts preparing the food
 
-      course ++;
-      repos.setNCourse(course);
+      course ++; // First course 
+      repos.setNCourse(course);//Update the number of courses
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
+
+   /**
+   * The chef continues preparing the courses
+   * Transitions the chef state from "delivering the portions" to "preparing a course" 
+   */
 
    public synchronized void continuePreparation ()   
    {
       int ChefID;
-      
+      //Set state
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.PREPARINGACOURSE);
 
-      course ++;
-      repos.setNCourse(course);
+      course ++; //Start another course
+      repos.setNCourse(course); //Update the number of courses
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
+
+   /**
+   * The chef will dish the protions
+   * Transitions the chef state from "preparing a course" to "dishing the portions" 
+   */
 
    public synchronized void proceedToPresentation ()   
    {
       int ChefID;
-      
+      //Set state
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.DISHINGTHEPORTIONS);
 
-      this.ready = true;
+      this.ready = true; // the portion is ready
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
+   /**
+   * The chef continue the portion dishing
+   * Transitions the chef state from "delivering the portions" to "dishing the portions" 
+   */
    public synchronized void haveNextPortionReady ()   
    {
       int ChefID;
-      
+      //Set State
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.DISHINGTHEPORTIONS);
 
-      this.ready = true;
+      this.ready = true; // The portion is ready
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
+
+   /**
+   * The chef will close service
+   * Transitions the chef state from "delivering the portions" to "closing service" 
+   */
 
    public synchronized void cleanUp ()   
    {
       int ChefID;
-      
+      //Set state
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.CLOSINGSERVICE);
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
+   /**
+   * The chef alerts the waiter that the portion is ready
+   * Transitions the chef state from "dishing the portions" to "delivering the portions"
+   */
    public synchronized void alertTheWaiter ()   
    {
       int ChefID;
-      
+      //Set state
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.DELIVERINGTHEPORTIONS);
 
       System.out.println("Chef ready");
 
+      //Sleep while waiting for the waiter to take the order
       while ((this.ready) ){
          try {
              wait();
@@ -181,7 +239,7 @@ public class Kitchen
          }
       }
 
-      notifyAll ();                                        // the Student settles the account
+      notifyAll ();                                        
    }
 
 
