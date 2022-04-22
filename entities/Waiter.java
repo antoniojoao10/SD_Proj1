@@ -50,6 +50,8 @@ public class Waiter extends Thread
    *     @param name thread name
    *     @param WaiterId Waiter id
    *     @param wTable reference to the Waiter table
+   *     @param wBar reference to the Waiter bar
+   *     @param wKitchen reference to the Waiter kitchen
    */
 
    public Waiter (String name, int WaiterId, Table wTable, Bar wBar, Kitchen wKitchen)

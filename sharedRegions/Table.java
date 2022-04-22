@@ -316,10 +316,10 @@ public class Table
 
         //increment the student course
         stu[StudentId].incrementStudentCourse();
-        //
+        //Change the flag hasPortion in student, to inform that this student no longer has a portion
         stu[StudentId].setHasPortion();
 
-        this.portions++;
+        this.portions++; //  number of portions already served and eaten
         repos.setNPortion(this.portions);
 
         notifyAll ();                                        
