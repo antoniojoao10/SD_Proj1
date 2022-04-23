@@ -1,5 +1,5 @@
-for i in $(seq 1 100)
+for i in $(seq 1 1000)
 do
 echo -e "\nRun n.o " $i
-  & 'C:\Program Files\Java\jdk-16\bin\java.exe' '-XX:+ShowCodeDetailsInExceptionMessages' '@C:\Users\joao2\AppData\Local\Temp\cp_3kpeyxjr9r68lw5a7supk26e2.argfile' 'main.TheRestaurant' 
+   cd /home/joao/Documents/UA/SD/SD_Proj1 ; /usr/bin/env /usr/lib/jvm/jdk-17/bin/java -XX:+ShowCodeDetailsInExceptionMessages @/tmp/cp_3l7fi4vllk2eyxnifl0aqjpd8.argfile main.TheRestaurant 
 done

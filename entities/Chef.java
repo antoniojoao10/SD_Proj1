@@ -107,7 +107,7 @@ public class Chef extends Thread
          cKitchen.proceedToPresentation();
          for(int i = 0 ; i < SimulPar.N ; i++){
             cKitchen.alertTheWaiter();
-            cKitchen.haveNextPortionReady();
+            if( i != SimulPar.N-1) cKitchen.haveNextPortionReady();
          }
          if(ai != SimulPar.C-1) cKitchen.continuePreparation();
       }

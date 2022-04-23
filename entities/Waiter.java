@@ -246,6 +246,8 @@ public class Waiter extends Thread
    { 
       while( wTable.checkingFlags()){
          switch(wBar.lookAround()){
+            case 0:
+               break;
             case 1:
                wTable.saluteTheClient(); 
                break;

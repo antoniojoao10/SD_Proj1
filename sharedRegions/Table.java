@@ -2,6 +2,9 @@ package sharedRegions;
 
 import main.*;
 import entities.*;
+
+import javax.swing.plaf.TextUI;
+
 import commInfra.*;
 import genclass.GenericIO;
 
@@ -25,6 +28,18 @@ public class Table
    private int waitingTable;
 
    /**
+   *  Flag that the first student joinned the talk
+   */
+
+    private boolean join;
+
+    /**
+   *  Flag to start delivering
+   */
+
+    private boolean deliver;
+
+   /**
    * Student already decided Course
    */
 
@@ -41,6 +56,11 @@ public class Table
    */
 
   private boolean getThePad;
+
+  /**
+   * Number of students that finished the course
+   */
+  private int finishedEating;
 
   /**
    * Portions
@@ -95,6 +115,16 @@ public class Table
   private boolean exit;
 
   /**
+   * Number of times that the waiter served
+   */
+  private int servings;
+
+  /**
+   * Number of signals to the waiter
+   */
+  private int signals;
+
+  /**
    *  Reference to Student threads.
    */
 
@@ -145,6 +175,11 @@ public class Table
       this.shouldHaveArrivedEarlier = false;
       this.firstStudent = -1;
       this.lastStudent = -1;
+      this.finishedEating = 0;
+      this.signals = 0;
+      this.join = true;
+      this.deliver = false;
+      this.servings = 0;
       this.wai = null;
       this.exit = false;
       stu = new Student [SimulPar.N];
@@ -203,7 +238,7 @@ public class Table
 
         movement ++;
         waitingTable++; 
-        stu[StudentId].enterBar();
+        stu[StudentId].wakeUpBar();
         notifyAll ();   
         // Student will sleep while waiting for the menu 
         while ( !(stu[StudentId].getStudentMenu()) ){
@@ -224,7 +259,7 @@ public class Table
    public synchronized boolean checkingFlags ()
    {
         if(this.exit) return false;  // return false if all students left the restaurant
-        if(portions == SimulPar.P ) this.signalTheWaiter = false;  // if all the students have finished all the portions, they cannot signal the waiter anymore
+        if(portions == SimulPar.P || servings == SimulPar.P) this.signalTheWaiter = false;  // if all the students have finished all the portions, they cannot signal the waiter anymore
 
         if( this.movement > 0){
             ((Waiter) Thread.currentThread ()).setmovement(movement);
@@ -261,6 +296,15 @@ public class Table
         stu[StudentId].setStudentState (StudentStates.SELECTINGTHECOURSES);
         repos.setstudentState(StudentId, stu[StudentId].getStudentState());
 
+        //wait until the last student has honnour the waiter
+        while ( !stu[StudentId].getStudentMenu() ){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         //change the flag of the current student thread to inform that he/she already read the menu
         stu[StudentId].setRead();
 
@@ -279,6 +323,9 @@ public class Table
       StudentId = ((Student) Thread.currentThread ()).getStudentId ();
       stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
       repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+
+      this.finishedEating = 7; //Flag that everyone is ready to signal the waiter
+      this.join = true;
 
       notifyAll ();                                        
    }
@@ -313,6 +360,8 @@ public class Table
         StudentId = ((Student) Thread.currentThread ()).getStudentId ();
         stu[StudentId].setStudentState (StudentStates.CHATTINGWITHCOMPANIONS);
         repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+        
+        this.finishedEating++;
 
         //increment the student course
         stu[StudentId].incrementStudentCourse();
@@ -391,6 +440,8 @@ public class Table
         //set state
         stu[StudentId].setStudentState (StudentStates.GOINGHOME);
         repos.setstudentState(StudentId, stu[StudentId].getStudentState());
+
+        stu[StudentId].wakeUpBar();
         notifyAll ();                                        
    }
 
@@ -432,6 +483,8 @@ public class Table
 
         this.callTheWaiter = true; //Flag that the waiter has been called
 
+        stu[firstStudent].wakeUpBar();
+
         notifyAll ();                                        
 
         // Sleep while the waiter hasnt given the pad yet
@@ -450,12 +503,41 @@ public class Table
      * The student signals the waiter for the next protion
      */
     public synchronized void signalTheWaiter ()
-    {
-        this.signalTheWaiter = true; // Flag to signla the waiter that wants another portion
+    {   
         int StudentId;
-        
         StudentId = ((Student) Thread.currentThread ()).getStudentId ();
-    
+
+        // Sleep while other students didnt finished the course
+        while ( this.finishedEating != 7){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        this.signals++; // increment the number of students that signaled the waiter
+        //if all students already ate and signalled the waiter, the waiter can start delivering the protions
+        if(this.signals == 7){
+            this.finishedEating = 0;
+            this.deliver = true;
+        }
+
+        // Only fills the fifo of the students have already eaten
+        if(!this.join){
+            try {
+                sitStudent.write(StudentId);
+            } catch (MemException e) { 
+                e.printStackTrace();
+            }
+        }
+
+        this.signalTheWaiter = true; // Flag to signla the waiter that wants another portion
+
+        stu[StudentId].wakeUpBar(); //wake up bar threads
+        notifyAll();
+
+        System.out.println("waiting" + StudentId);
         // Sleep while the waiter doenst deliver his portion
         while ( !stu[StudentId].getHasPortion()){
             try {
@@ -479,7 +561,8 @@ public class Table
         repos.setstudentState(lastStudent, stu[lastStudent].getStudentState());
 
         this.shouldHaveArrivedEarlier = true; // flag that the last student is ready to pay the bill
-
+        
+        stu[lastStudent].wakeUpBar();
         notifyAll ();                                        
 
 
@@ -549,6 +632,16 @@ public class Table
     public synchronized void deliverPortion ()
     {
         int StudentId = 0;
+        this.join = false; //flag reversal
+
+        //Sleeps while waiting for the last student to honour him
+        while(!this.deliver){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         wai = ((Waiter) Thread.currentThread ());
         
@@ -558,13 +651,13 @@ public class Table
             e.printStackTrace();
         }
 
-        try {
-            sitStudent.write(StudentId);
-        } catch (MemException e) { 
-            e.printStackTrace();
-        }
+        this.signals--; // decrement the nimber of signal because the student has been served
+        if(this.signals==0) this.deliver = false; //Stop delivering when there are no more people signaling
+
+        System.out.println("serving" + StudentId);
 
         stu[StudentId].setHasPortion(); //Gives the student his portion
+        this.servings++; // increment the number o times that the waiter served
 
         notifyAll ();                                        
     }

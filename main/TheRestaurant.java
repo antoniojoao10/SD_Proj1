@@ -36,8 +36,8 @@ public class TheRestaurant
     chef = new Chef("Chef_1", 0, kitchen);
     waiter = new Waiter("Waiter_1", 0, table, bar, kitchen);
     for (int i = 0; i < SimulPar.N; i++){
-        student[i] = new Student("Student_"+(i+1), i, table,bar);
-        System.out.print(i);}
+      student[i] = new Student("Student_"+(i+1), i, table,bar);
+    }
     
     /* start of the simulation */
     chef.start();

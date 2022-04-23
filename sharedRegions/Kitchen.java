@@ -227,8 +227,7 @@ public class Kitchen
       //Set state
       ChefID = ((Chef) Thread.currentThread ()).getChefId();
       repos.setchefState(ChefID, ChefStates.DELIVERINGTHEPORTIONS);
-
-      System.out.println("Chef ready");
+      
 
       //Sleep while waiting for the waiter to take the order
       while ((this.ready) ){

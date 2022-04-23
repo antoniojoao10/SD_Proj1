@@ -120,7 +120,7 @@ public class Bar
    /**
    * The student wakes all threads at the Bar to signal the he had entered the restaurant
    */
-   public synchronized void enter ()   
+   public synchronized void wakeUp ()   
    {
       notifyAll ();                                        
    }

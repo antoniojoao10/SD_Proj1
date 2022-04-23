@@ -30,6 +30,12 @@ public class Student extends Thread
    private boolean StudentMenu;
 
    /**
+   * Flag - Student is eating
+   */
+
+  private boolean eating;
+
+   /**
    *  Number of course that the student is in
    */
    private int StudentCourse; 
@@ -90,6 +96,26 @@ public class Student extends Thread
       this.hasPortion = false;
       this.iamthefirst = false;
       this.iamthelast = false;
+   }
+
+   /**
+   *   Get student flag that he is eating
+   */
+
+   public boolean getEating ()
+   {
+      return this.eating;
+   }
+
+  /**
+   *   Set student flag that he is eating
+   *
+   *     @param id Student id
+   */
+
+   public void setEating ()
+   {
+      this.eating = !this.eating;
    }
 
   /**
@@ -196,8 +222,8 @@ public class Student extends Thread
       *   Student enters the bar - Wake threads at the bar
       */
 
-   public void enterBar(){
-      sBar.enter();
+   public void wakeUpBar(){
+      sBar.wakeUp();
    }
 
    /**
@@ -219,7 +245,7 @@ public class Student extends Thread
    /**
       *  Change flag read
       */
-   public void setRead(){ this.read = !this.read; }
+   public void setRead(){ this.read = true; }
 
   /**
    *   Life cycle of the Student.
@@ -255,7 +281,7 @@ public class Student extends Thread
   public void eating()
   {
      try
-     { sleep ((long) (1 + 50 * Math.random ()));
+     { sleep ((long) (1 + 100 * Math.random ()));
      }
      catch (InterruptedException e) {}
   }
@@ -263,7 +289,7 @@ public class Student extends Thread
    private void walkabit()
    {
       try
-      { sleep ((long) (1 + 20 * Math.random ()));
+      { sleep ((long) (1 + 50 * Math.random ()));
       }
       catch (InterruptedException e) {}
    }
