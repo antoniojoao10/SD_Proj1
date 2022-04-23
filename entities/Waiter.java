@@ -258,12 +258,13 @@ public class Waiter extends Thread
                wKitchen.handTheNoteToTheChef();
                break;
             case 4:
-               for(int i = 0 ; i < SimulPar.P ; i++){
+               for(int i = 0 ; i < SimulPar.N ; i++){
                   wKitchen.collectPortion();
                   wTable.deliverPortion();
                }
                break;
             case 5:
+               System.out.println("here");
                wBar.prepareTheBill();
                wTable.presentTheBill();
                break;

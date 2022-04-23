@@ -59,13 +59,13 @@ public class Bar
       if( ((Waiter) Thread.currentThread ()).getmovement() > 0 ){
          ((Waiter) Thread.currentThread ()).removemovement(); 
          res = 1;
-      }
+      }/*
       else if( ((Waiter) Thread.currentThread ()).getalertTheWaiter() ){
          ((Waiter) Thread.currentThread ()).setWaiterState(WaiterStates.PROCESSINGTHEBILL);
          repos.setwaiterState( ((Waiter) Thread.currentThread ()).getWaiterId(), WaiterStates.PROCESSINGTHEBILL);
          ((Waiter) Thread.currentThread ()).setalertTheWaiter(); 
          res = 2;
-      }
+      }*/
       else if( ((Waiter) Thread.currentThread ()).getcallTheWaiter() ){
          ((Waiter) Thread.currentThread ()).setWaiterState(WaiterStates.TAKINGTHEORDER);
          repos.setwaiterState( ((Waiter) Thread.currentThread ()).getWaiterId(), WaiterStates.TAKINGTHEORDER);
@@ -83,7 +83,7 @@ public class Bar
          res = 5;
       }
       
-      System.out.println("waiter " + res);
+      //System.out.println("waiter " + res);
       notifyAll ();                
       return res;
    }

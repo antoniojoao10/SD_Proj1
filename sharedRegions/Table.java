@@ -2,9 +2,6 @@ package sharedRegions;
 
 import main.*;
 import entities.*;
-
-import javax.swing.plaf.TextUI;
-
 import commInfra.*;
 import genclass.GenericIO;
 
@@ -517,7 +514,7 @@ public class Table
         }
 
         this.signals++; // increment the number of students that signaled the waiter
-        //if all students already ate and signalled the waiter, the waiter can start delivering the protions
+        //if all students already ate and signalled the waiter, the waiter can start delivering the portions
         if(this.signals == 7){
             this.finishedEating = 0;
             this.deliver = true;
@@ -537,7 +534,7 @@ public class Table
         stu[StudentId].wakeUpBar(); //wake up bar threads
         notifyAll();
 
-        System.out.println("waiting" + StudentId);
+        //System.out.println("waiting" + StudentId);
         // Sleep while the waiter doenst deliver his portion
         while ( !stu[StudentId].getHasPortion()){
             try {
@@ -556,6 +553,14 @@ public class Table
      */
     public synchronized void shouldHaveArrivedEarlier ()
     {
+        // Sleep while waiting for all students to finish desert
+        while ( this.finishedEating != 7 ){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         //set state
         stu[lastStudent].setStudentState (StudentStates.PAYINGTHEBILL);
         repos.setstudentState(lastStudent, stu[lastStudent].getStudentState());
@@ -654,7 +659,7 @@ public class Table
         this.signals--; // decrement the nimber of signal because the student has been served
         if(this.signals==0) this.deliver = false; //Stop delivering when there are no more people signaling
 
-        System.out.println("serving" + StudentId);
+        //System.out.println("serving" + StudentId);
 
         stu[StudentId].setHasPortion(); //Gives the student his portion
         this.servings++; // increment the number o times that the waiter served
