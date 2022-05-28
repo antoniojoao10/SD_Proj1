@@ -264,7 +264,6 @@ public class Waiter extends Thread
                }
                break;
             case 5:
-               System.out.println("here");
                wBar.prepareTheBill();
                wTable.presentTheBill();
                break;

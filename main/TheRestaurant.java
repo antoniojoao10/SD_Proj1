@@ -26,7 +26,7 @@ public class TheRestaurant
     Table table;						//Reference to the table
     GeneralRepos repos;                             			//Reference to the General Repository
 
-    System.out.println("The Restaurante");
+    System.out.println("The Restaurant");
     /* problem initialization */
     repos = new GeneralRepos("logger");
     kitchen = new Kitchen(repos);

@@ -11,15 +11,12 @@ import genclass.GenericIO;
  *    It is responsible to keep a continuously updated account of the Students inside the Table
  *    and is implemented as an implicit monitor.
  *    All public methods are executed in mutual exclusion.
- *    There are two internal synchronization points: a single blocking point for the barbers, where they wait for a Student;
- *    and an array of blocking points, one per each Student, where he both waits his turn to cut the hair and sits on the
- *    cutting chair while having his hair cut.
  */
 
 public class Table
 {
   /**
-   *  Number students in the restaurante
+   *  Number students in the restaurant
    */
 
    private int waitingTable;
@@ -37,7 +34,7 @@ public class Table
     private boolean deliver;
 
    /**
-   * Student already decided Course
+   * Number of studdents that decided Course
    */
 
   private int decidedStudents;
@@ -107,7 +104,7 @@ public class Table
   private int lastStudent;
 
   /**
-   * Flag -  Signal the waiter thar every student leaved the restaurant
+   * Flag -  Signal the waiter thar every student left the restaurant
    */
   private boolean exit;
 
@@ -262,10 +259,6 @@ public class Table
             ((Waiter) Thread.currentThread ()).setmovement(movement);
             this.movement = 0;
         }
-        else if( this.shouldHaveArrivedEarlier){
-            ((Waiter) Thread.currentThread ()).setshouldHaveArrivedEarlier();
-            this.shouldHaveArrivedEarlier = false;
-        }
         else if( this.callTheWaiter){
             ((Waiter) Thread.currentThread ()).setcallTheWaiter();
             this.callTheWaiter = false;
@@ -273,6 +266,10 @@ public class Table
         else if( this.signalTheWaiter){
             ((Waiter) Thread.currentThread ()).setsignalTheWaiter();
             this.signalTheWaiter = false;
+        }else if( this.shouldHaveArrivedEarlier){
+            ((Waiter) Thread.currentThread ()).setshouldHaveArrivedEarlier();
+            System.out.println("arrive");
+            this.shouldHaveArrivedEarlier = false;
         }
         notifyAll ();     
         
@@ -478,7 +475,7 @@ public class Table
     public synchronized void callTheWaiter ()
     {
 
-        this.callTheWaiter = true; //Flag that the waiter has been called
+        wai.setcallTheWaiter(); //Flag that the waiter has been called
 
         stu[firstStudent].wakeUpBar();
 
@@ -565,11 +562,10 @@ public class Table
         stu[lastStudent].setStudentState (StudentStates.PAYINGTHEBILL);
         repos.setstudentState(lastStudent, stu[lastStudent].getStudentState());
 
-        this.shouldHaveArrivedEarlier = true; // flag that the last student is ready to pay the bill
-        
+        //System.out.println("wake");
+        wai.setshouldHaveArrivedEarlier(); // Flag the waiter thar the last student is ready to pay
         stu[lastStudent].wakeUpBar();
         notifyAll ();                                        
-
 
         // Sleep while the waiter hasnt given the bill to the last student
         while (!(this.presentBill) ){

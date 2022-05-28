@@ -49,7 +49,7 @@ public class Bar
    {
       int res = 0;
       while ( ((Waiter) Thread.currentThread ()).getmovement()==0 && !((Waiter) Thread.currentThread ()).getalertTheWaiter() && !((Waiter) Thread.currentThread ()).getcallTheWaiter() && !((Waiter) Thread.currentThread ()).getshouldHaveArrivedEarlier() && !((Waiter) Thread.currentThread ()).getsignalTheWaiter()){
-         try {
+         try {             
             wait();
             return res;
          } catch (InterruptedException e) {

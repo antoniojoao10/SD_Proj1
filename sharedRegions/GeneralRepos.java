@@ -195,8 +195,8 @@ public class GeneralRepos
          }
       log.writelnString ("                Problem of the Restaurant");
       //log.writelnString ("\nNumber of iterations = " + nIter + "\n");
-      log.writelnString ("Chef\tWaiter\tStu0\tStu1\tStu2\tStu3\tStu4\tStu5\tStu6\tNCourse\tNPortion\t\t\t\t\t\t\tTable");
-      log.writelnString ("State\tState\tState\tState\tState\tState\tState\tState\tState\t\t\t\t\t\tSeat0\tSeat1\tSeat2\tSeat3\tSeat4\tSeat5\tSeat6");
+      log.writelnString ("Chef\tWaiter\tStu0\tStu1\tStu2\tStu3\tStu4\tStu5\tStu6\tNCourse\tNPortion\t\t\t\tTable");
+      log.writelnString ("State\tState\tState\tState\tState\tState\tState\tState\tState\t\t\t\tSeat0\tSeat1\tSeat2\tSeat3\tSeat4\tSeat5\tSeat6");
       if (!log.close ())
          { GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
            System.exit (1);
@@ -272,11 +272,11 @@ public class GeneralRepos
         }
       
         
-        lineStatus += "\t" + this.NCourse + "\t";
-        lineStatus += "\t" + this.NPortion + "\t";
+        lineStatus += this.NCourse + "\t";
+        lineStatus += this.NPortion + "\t\t";
 
         for(int i=0; i < SimulPar.N ; i++){
-         lineStatus += "\t" + this.studentSit[i] + "\t";
+         lineStatus += this.studentSit[i] + "\t";
         }
         
       log.writelnString (lineStatus);
