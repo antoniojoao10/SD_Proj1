@@ -85,10 +85,10 @@ public class TableInterface
 
       { case MessageType.enterTableREQ:  ((TableClientProxy) Thread.currentThread ()).setStudentId(inMessage.getStuId());
                                    ((TableClientProxy) Thread.currentThread ()).setStudentState(inMessage.getStuId ());
-                                   Table.enter();
+                                   
                                    outMessage = new Message (MessageType.enterTableDONE,
                                                              ((TableClientProxy) Thread.currentThread ()).getStudentId (),
-                                                             ((TableClientProxy) Thread.currentThread ()).getStudentState ());
+                                                             ((TableClientProxy) Thread.currentThread ()).getStudentState (), Table.enter());
                                     break;
          case MessageType.lookArREQ:  ((TableClientProxy) Thread.currentThread ()).setWaiterId(inMessage.getWaiId());
                                     ((TableClientProxy) Thread.currentThread ()).setWaiterState(inMessage.getWaiId ());

@@ -138,12 +138,24 @@ public class Message implements Serializable
    */
    private int [] studentSit;
 
+   /**
+   *  first student
+   */
+  private int first;
+
+  /**
+   *  last student
+   */
+  private int last;
+
    public Message (int type)
    {
       msgType = type;
       this.NCourse = 0;
       this.NPortion = 0;
       this.currentSit = 0;
+      this.first = -1;
+      this.last = -1;
       this.studentSit = new int [SimulPar.N];
       for (int i = 0; i < SimulPar.N; i++)
         studentSit[i] = -1;
@@ -236,8 +248,9 @@ public class Message implements Serializable
                         }else if( msgType == MessageType.setNPortionREQ) NPortion = id;
                         else if( msgType == MessageType.setNCourseREQ ) NCourse = id;
                         else if( msgType == MessageType.writeSitREQ ) {
-                           this.studentSit[currentSit] = id;
-                           this.currentSit++;
+                           this.studentSit[this.currentSit] = id;
+                           this.currentSit = this.currentSit + 1;
+                           System.out.println("sit" + this.currentSit);
                         }
                         else if( msgType == MessageType.removeSitREQ ){
                            for( int i = 0; i < SimulPar.N ; i++){
@@ -322,10 +335,19 @@ public class Message implements Serializable
 
   public Message (int type, int WaiId, int WaiState, int lookAr)
   {
-     msgType = type;
-     this.WaiId= WaiId;
-     this.WaiState = WaiState;
-     this.lookAr= lookAr;
+     if( type == MessageType.enterTableDONE ){
+         msgType = type;
+         this.StuId = WaiId;
+         this.StuState = WaiState;
+         if( lookAr == 1 ) this.first = WaiId;
+         if( lookAr == -1 ) this.last = WaiId;
+
+     }else{
+      msgType = type;
+      this.WaiId= WaiId;
+      this.WaiState = WaiState;
+      this.lookAr= lookAr;
+     }
   }
 
   /**
@@ -478,6 +500,8 @@ public class Message implements Serializable
   public int getNPortion(){ return NPortion; }
   public int getNCourse(){ return NCourse ; }
   public int[] getSits(){ return studentSit ; }
+  public int getFirst(){ return first; }
+  public int getLast(){ return last ; }
 
 
   /**

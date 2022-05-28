@@ -91,8 +91,6 @@ public class ClientTheRestaurantStudent
       genReposStub = new GeneralReposStub (genReposServerHostName, genReposServerPortNumb);
       for (int i = 0; i < SimulPar.N; i++){
         Student[i] = new Student ("Stu_" + (i+1), i, tableStub, barStub);
-        if(i==0) Student[i].setFirst();
-        if(i==SimulPar.N-1) Student[SimulPar.N-1].setlast();
       }
 
      /* start of the simulation */

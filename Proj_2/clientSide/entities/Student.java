@@ -232,7 +232,10 @@ public class Student extends Thread
    public void run ()
    {
       walkabit();
-      sTable.enter();
+      int res = sTable.enter();
+      if( res == 1 ) this.iamthefirst = true;
+      if( res == -1 ) this.iamthelast = true;
+
       sTable.readTheMenu();
       if(this.iamthefirst){
          sTable.prepareOrder();

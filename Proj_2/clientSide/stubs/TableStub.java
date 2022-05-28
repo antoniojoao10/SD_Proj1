@@ -46,7 +46,7 @@ public class TableStub
    *  A student enters the restaurant
    */
 
-   public void enter ()
+   public int enter ()
    {
       ClientCom com;                                                 // communication channel
       Message outMessage,                                            // outgoing message
@@ -75,6 +75,9 @@ public class TableStub
          }
       ((Student) Thread.currentThread ()).setStudentState(inMessage.getStuState());
       com.close ();
+      if( inMessage.getFirst() == ((Student) Thread.currentThread ()).getStudentId()) return 1;
+      if( inMessage.getLast() == ((Student) Thread.currentThread ()).getStudentId()) return -1;
+      return 0;
    }
 
    /**

@@ -202,7 +202,7 @@ public class Table
    * Transitions the student state from "going to the restaurant" to "taking a sit at the table" 
    */
 
-   public synchronized void enter ()
+   public synchronized int enter ()
    {
         int StudentId;
 
@@ -242,6 +242,10 @@ public class Table
             }
         }   
         notifyAll ();    
+        if( StudentId == firstStudent) return 1;
+        if( StudentId == lastStudent) return -1;
+        else return 0;
+
    }
 
    /**
@@ -463,6 +467,15 @@ public class Table
             this.exit = true;
         }
 
+        notifyAll();
+        while (!this.exit && this.stu[lastStudent].getStudentState() != StudentStates.GOINGHOME){
+            try {
+               wait();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
+
         //set state
         stu[StudentId].setStudentState (StudentStates.GOINGHOME);
         repos.setstudentState(StudentId, stu[StudentId].getStudentState());
@@ -548,7 +561,14 @@ public class Table
      * Transitions the student state from "chatting with companions" to "paying the bill" 
      */
     public synchronized void shouldHaveArrivedEarlier ()
-    {
+    {   
+        while (this.portions % 7 != 0){
+            try {
+               wait();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
         //set state
         stu[lastStudent].setStudentState (StudentStates.PAYINGTHEBILL);
         repos.setstudentState(lastStudent, stu[lastStudent].getStudentState());
@@ -665,6 +685,8 @@ public class Table
         //set State
         ((TableClientProxy) Thread.currentThread ()).setWaiterState(WaiterStates.RECEIVINGPAYMENT);
         repos.setwaiterState(wai.getWaiterId(), WaiterStates.RECEIVINGPAYMENT);
+        stu[lastStudent].setStudentState (StudentStates.GOINGHOME);
+        this.stu[lastStudent].setStudentState(StudentStates.GOINGHOME);
         notifyAll ();                                        
     }
 
